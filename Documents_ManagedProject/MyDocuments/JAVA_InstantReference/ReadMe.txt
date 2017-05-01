@@ -784,8 +784,8 @@ then you can do this by by editing the "sun-resources.xml" file - add more <jdbc
 
 When the web-application is deployed, the Glassfish server reads the resource declarations from this "sun-resources.xml" file and creates the necessary resources(DataSource-"myTestDataSource"  and Connection Pool-"myTestPool") in the Glassfish server. 
 
-You donï¿½t have to create ï¿½sun-resources.xmlï¿½ file again and again for different web application projects in the same local Glassfish server as the necessary JDBC resources (ConnectionPool -ï¿½myTestPoolï¿½and DataSource -ï¿½myTestDataSourceï¿½)  are  already created in the Glassfish server.  
-The files ï¿½sun-resources.xmlï¿½  and  ï¿½web.xmlï¿½  are needed to be bundled in the WAR/EAR file if the application needs to be deployed in a remote server.
+You don’t have to create “sun-resources.xml” file again and again for different web application projects in the same local Glassfish server as the necessary JDBC resources (ConnectionPool -“myTestPool”and DataSource -“myTestDataSource”)  are  already created in the Glassfish server.  
+The files “sun-resources.xml”  and  “web.xml”  are needed to be bundled in the WAR/EAR file if the application needs to be deployed in a remote server.
 
 
 (Refer the document "Setting up JDBC Resources (DataSource, ConnectionPool) in Glassfish server.doc")
@@ -968,16 +968,26 @@ WebAppProject1 (Simple JSP Page with DB operation using JDBC Datasource and JSTL
 				  	Note:- You can edit the web.xml directly or through the "servlet" tab of the graphical interface of web.xml
 
 
-
-
 /DisplayRecords/
 	testDataSource.jsp  	- displays the customer table data through "DB Report" 
 	testDataSource2.jsp  	- displays the customer table data through "DB Query Database" and "JSTL for Each"
 
-/InsertOrUpdateRecords/
-	customerForm.jsp  	- Insert records in customer table data through "DB Insert Database"
 
-Run the jsp page 		in NetBeans -> right click the JSPt file --> Run
+/InsertOrUpdateRecords/
+	customerForm.jsp  	- Give a reference to the database "mytestschema" directly in the JSP file to get access to the database 
+												(You don't have to refer the web.xml file's resource reference entry)
+
+					Code:-
+						 <sql:setDataSource  var="myDataSource" 
+                            				driver="com.mysql.jdbc.Driver"
+                            				url="jdbc:mysql://localhost:3306/mytestschema"
+                            				user="root"  
+                            				password="nbuser"/>	
+        					 	
+				- inserts recods in the customer table through JSTL SQL-Query ( ""DB Insert Database"") using the datasouce variable "myDataSource"
+				  
+
+Run the jsp page in NetBeans 	-> right click the JSPt file --> Run
 
 
 
@@ -1327,36 +1337,6 @@ Invoke the servlet 		in NetBeans -> right click the servlet file --> Run
 
 
 
-
-
-
-
-
-
-********************************************************************************************************
-WebAppProject7 (Simple JSP Page Inserting / Displaying Data using JDBC Datasource and JSTL SQL-Query)
---------------------------------------------------------------------------------------------------------
-
-/Server Resources/ 
-	sun-resources.xml 	- defines the connection pool / jdbc data source details for the database "mytestschema"
-				   It can be done through the Glassfish application server-console (localhost:4848) or from the NetBeans IDE
-
-
-/testCustomer/
-	customerForm.jsp	- Give a reference to the database "mytestschema" directly in the JSP file to get access to the database 
-												(You don't have to refer the web.xml file's resource reference entry)
-
-					Code:-
-						 <sql:setDataSource  var="myDataSource" 
-                            				driver="com.mysql.jdbc.Driver"
-                            				url="jdbc:mysql://localhost:3306/mytestschema"
-                            				user="root"  
-                            				password="nbuser"
-        					 />		
-				- inserts / displays the customer data through JSTL SQL-Query ( ""DB Insert Database"", "DB Query Database" and "JSTL for Each") 
-				  using the above datasouce variable "myDataSource"
-
-Run the jsp page in NetBeans -> right click the JSPt file --> Run
 
 
 
