@@ -1,8 +1,7 @@
 
 
 
-http://kveeresham.blogspot.in/2015/03/logging-jdbc-activities-using-log4jdbc.html
-http://dev-answers.blogspot.in/2013/10/quick-start-to-tracing-jdbc-sql.html
+
 
 
 
@@ -12,6 +11,7 @@ http://dev-answers.blogspot.in/2013/10/quick-start-to-tracing-jdbc-sql.html
 
 
 Useful JAVA reference sites:
+===========================================
 http://www.javaknowledge.info/jstl-1-1-simple-insert-update-delete-example/
 https://www.youtube.com/watch?v=eaAqwTdUAAo (Durga software solutions)
 
@@ -19,7 +19,9 @@ https://netbeans.org/kb/docs/web/mysql-webapp.html
 https://netbeans.org/kb/docs/web/mysql-webapp.html#view-connection-pool
 https://netbeans.org/kb/docs/ide/git.html
 
-Openshift tutorial -  https://www.youtube.com/watch?v=TTbj_x3yiLE
+https://netbeans.org/project_downloads/samples/Samples/JavaEE/ecommerce/ 		(Affable Bean Project snapshots loation)
+
+https://www.youtube.com/watch?v=TTbj_x3yiLE						(Openshift tutorial)  
 
 -----------------------------------------------------------------------------------------------------------
 
@@ -30,25 +32,8 @@ Openshift tutorial -  https://www.youtube.com/watch?v=TTbj_x3yiLE
 
 
 
-
-
-Affable Bean Project snapshots loation:
-https://netbeans.org/project_downloads/samples/Samples/JavaEE/ecommerce/
-------------------------------------------------------------------------------------------- 
-
-
-
-
-
-
-
-
-
-
-
-
-
 Web hosting sites:
+=========================================
 https://www.openshift.com
 http://cloudbees.com
 http://www.serversfree.com/
@@ -85,11 +70,213 @@ Right click anywhere in the coding page > insert code 	-> it will give you many 
 
 Java Program structure
 ================================
-1. Add the required JAR files to the Project library					(for example add "log4j-1.2.17.jar" to the Java application Project's library) 
-2. If required put the required JARs in the application server's library folder 	(c:/programfiles/glassfish/domains/domain1/lib)
+1. Add JDK bin folder to the PATH
+		set path C:\Program Files\Java\jdk1.8.0_111\bin 			(all the JAVA compile commands are in this folder)
+
+2. Add the library folder to the CLASSPATH
+		set classpath C:\Program Files\Java\jre1.8.0_131\lib 			(all the necessary jar files, usesd at run time are present in this folder)
+
+3. Add the required JAR files to the Project library					(for example add "log4j-1.2.17.jar" to the Java application Project's library)
+ 
+4. In case of web application, put the required JARs in the server's library folder 	(c:/programfiles/glassfish/domains/domain1/lib)
+
 3. Import the required libraries(present in the JAR) in the JAVA application		(Ex:- "import import org.apache.log4j.Logger;" )
-4. Use the library's class in the Program						(Ex:- "Logger" class  )					
+
+4. Use the library's class in the Program						(Ex:- "Logger" class  )	
+				
 5. Instantiate the class and use the method of the class in the Java application 	(Ex:- The class's getLogger() method returns an object ->used for loggings)
+
+
+
+
+
+
+
+
+
+What is EJB and How it Works
+=============================
+
+1. First, the users input some data through a Form (index.html) or in a URL query string and submits to the Servlet for processing.
+
+2. The servlet captures the user inputs through request.getParameter("<userInputName>"), processes the inputs and sends response to the client (browser)
+
+3. If there is any business logic to be processed, then then servlet uses the EJB session bean to perform the business logic by invoking its services/methods 
+
+4. Examples of EJB session bean to add two numbers accepted as user inputs
+   -----------------------------------------------------------------------------
+	AddNumbers.java 
+		- contains the private attributes (relevant to the user Inputs-> i.e first Number, second number)
+		- has public constructor 
+		- jas getter-setter method for all the attributes
+		- has a method "addNumbers()" to implement business logic (->add two numbers and assign the result to another attribute)
+		
+
+	
+5. In the servlet class, Inject the EJB container 
+								Code:-
+									@EJB           
+
+ 			 Instantiate the EJB bean   
+								Code:-
+									AddNumbers addObj; 			
+							
+7. Now the Servlet can use the EJB bean object("addObj") to invoke the required method "addNumbers()" for addition of two numbers 					
+
+8. For that, you have to first set relevant EJB bean attributes with the respective FORM inputs (already captured by servlet) through setter  method.
+
+9. The servlet can fetch the add result(stored in a EJB bean attribute) through getter method and  print it to browser screen.	 
+
+	Note:-
+		Here, instead of EJB bean, We could have created a simple bean "AddNumbers" and instantiated it in normal way like 
+		-> AddNumbers addObj = new AddNumbers()
+		and used its method "addNumbers()" in the servlet. it would still work.
+				
+		But the issue will arise when we come across a  distributed system. 
+				(where, the servlet might be in a server situated at one location and the simple bean might be in a machine at different location)
+				In this scenario, the servlet can't recognize the simple bean "AddNumbers.java".
+				So we have to handle this issue by creating EJB bean.
+				Since the EJB bean is created inside the EJB container, it can be accessed from a servlet (irrespective of its machine location) 	
+
+10. System requirements:
+	You need the ejb jar file ("javax.ejb-3.1.2.2.jar") to be added to the Project library
+ 	But in our case, the Glassfish server (which is already installed), contains the ejb libraries. So no need to separately add the ejb jar file to the project.
+
+11. In the servlet class, you have to import the ejb APIs to avail the functionality of EJB(Enterprise Java Beans)
+
+								Code:- 
+									import javax.ejb.*;
+
+
+Example of EJB session bean to handle database operation (fetch/insert/update/delete data from the Database table)
+--------------------------------------------------------------------------------------------------------------------
+
+CustomerFacade.java
+		- inherits the abstract class - "AbstractFacade.java", which actually performs all the database operations using the JPA functionalities
+    		
+		- operates on the database table "customer" through the entity bean - "Customer.java" 
+
+		- Sine the entity bean is created in the Persistent Provider(JPA),      		
+		  the session bean has to inject the Persistence Unit to use the functionalities of "EntityManager" component of JPA, which reads the ORM meta data for 													  an entity and performs persistence operations on the database 
+			
+			Inject the Persistence Unit 
+       								Code:- 		
+									@PersistenceContext(unitName = "<ProjectName>_PU")
+			
+			Instantiate the EntityManager component of JPA
+								
+								Code:- 
+									private EntityManager em; 
+
+		- since the session beans extends an abstracts class "AbstractFacade.java", so it has to implement the abstract method "getEntityManager()" of the 		  parent class by overriding it and it has to return an EntityManager object ("em")
+									
+								Code:- 
+									@Override
+    									protected EntityManager getEntityManager() {
+        									return em;
+    									}
+
+			
+
+		- The EJB session bean doesn't have its own methods. 
+		  It inherits the database operation methods (create()/edit()/remove()/find()/findAll()....)  from its Parent Class("AbstractFacade.java")
+		  
+		- To convey the parent class that it wants findAll() operation on the "Customer" entity bean,
+	 	   the session bean invokes the constructor of the parent abstract class inside its own constructor 
+				    and pass the entity bean (Customer.class) as an argument 
+				    so that the parent class's constructor will set the value of its own attribure "entityClass" as Customer.class
+								
+								Code:-	
+									public CustomerFacade() {
+        									super(Customer.class);
+    									}
+		
+			
+			
+AbstractFacade.java
+		- The Abstract class contains:
+			- a private attribute "entityClass" which is of type Class<T>
+								
+								Code:-
+									private Class<T> entityClass;
+			
+			- a constructor which sets the value of its attribute "entityClass" as its argument value.
+												
+								Code:-
+									public AbstractFacade(Class<T> entityClass) {
+        									this.entityClass = entityClass;
+    									}
+
+								So when it is invoked inside the constructor of the session bean through super(Customer.class), 
+								it sets value of its attribute "entityClass" as "Customer.class"
+
+			- an abstract method "getEntityManager()" which has a "EntityManager" return type 
+
+			- the methods(create()/edit()/remove()/find()/findAll()....) which use the "getEntityManager()" to perform various database operation
+			  
+
+			- For example, the above basic database operation methods are implemented like this:
+
+								Code:-
+									//select all records from the table
+									public List<T> findAll() {
+        										cq = getEntityManager().getCriteriaBuilder().createQuery();
+        										cq.select(cq.from(entityClass));
+        										return getEntityManager().createQuery(cq).getResultList();
+									}
+
+									//Add a new record
+									public void create(T entity) {
+        										getEntityManager().persist(entity);
+    									}
+									
+									//Modify an existing record
+    									public void edit(T entity) {
+        										getEntityManager().merge(entity);
+    									}
+									
+									//delete a record
+    									public void remove(T entity) {
+        										getEntityManager().remove(getEntityManager().merge(entity));
+    									}
+
+			- since the "getEntityManager()" abstract method is of type "EntityManager",  			   hence  "getEntityManager()" method automatically gets access to the EntityManager class's methods such as 
+													- createQuery() / persist() / merge() / remove() ...... 
+			
+
+	
+		- The Abstract class has to import the Persistence APIs to avail the functionality of JPA
+								Code:-	
+									import javax.persistence.*;
+									import javax.persistence.EntityManager;
+	
+
+
+
+In the servlet class, 
+		Sine the session bean is created in the EJB container,     		
+		  the servlet has to inject the EJB container to use the functionalities of EJB 
+			
+			Inject the EJB container 
+								Code:- 
+									@EJB           
+
+ 			Instantiate the EJB bean   
+								Code:-
+									CustomerFacade customerFacade;	
+
+		Now the Servlet can use the EJB session bean object("customerFacade") 
+								to invoke the required method "findAll()" for retrieving all the records from the customer table
+								and assign the return value to a application-scoped variable which can be used later for display
+								
+								Code:-
+									getServletContext().setAttribute("customerDetails",customerFacade.findAll());
+			
+
+		
+		
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 
@@ -108,8 +295,6 @@ OR
 If it is a maven - web application Project, 
 Right click the project > Custom > Goals > Type "install"  
 The war file "<Project name>.war" will be created under the "target" folder of your app
-
-
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -145,8 +330,8 @@ Access the Web applicaion through the URL:
 
 
 
-Requesteed Parameter
-==========================
+How to capture the user inputs in the servlet or JSP
+=============================================================
 
 http://localhost:8080/customer.jsp?first_name=Sambit&last_name=Sahu
 The values passed as query string can be retrieved 
@@ -210,166 +395,276 @@ Ex:- 	When you write the "Car" object to the OutputStream, the "writeExternal" m
 
 LOG4J and LOG4JDBC - (Logs the application info during RUNTIME to a LOG FILE or CONSOLE or a DATABASE TABLE)
 =============================================================================================================
-1. Download and then Add the following jars into [webapp]/WEB-INF/lib
-								log4j-[version].jar 
-								log4j-jdbc-remix-[version].jar
-								log4jdbc4-[version].jar  
-								slf4j-api-[version].jar
-								slf4j-log4j12-[version].jar
 
-	Right click the Project > Properties > Libraries > Add JAR/Folder > select required JAR file(s)
-		JAR files will be added to the NetBeans IDE <project tab> / <project name> / libraries
-		
-	Also put the jar files in the glassfish library folder-
-							C:\Program Files\glassfish-4.1\glassfish\domains\domain1\lib\
-			
-2. Create "log4j.properties" file 
+
+Implement Log4J in a Java application
+--------------------------------------
+1. Download the following JAR files:
+				log4j-1.2.17.jar 
+				log4jdbc-1.2.jar  
+				slf4j-api-1.7.5.jar
+				slf4j-log4j12-1.7.5.jar
+   
+	Note:- 
+		If there is no Database operations involved, then you need only the LOG4J JAR file (log4j-1.2.17.jar ) to provide the application logs
+	  	If there is database operation involved, then you also need the LOG4JDBC JAR files (log4jdbc-1.2.jar, slf4j-api-1.7.5.jar, slf4j-log4j12-1.7.5.jar )
+
+2. Add the following jars to the Project's librarry
+	
+	NetBeans IDE - Right Click the Project > Properties > libraries > ADD JAR > select required JAR file(s) > OK
+
+	Now the JAR files will appear in the
+		NetBeans IDE <project tab> / <project name> / libraries 
+	
+	
+3. Create "log4j.properties" file 
 	Right click source > new > other > properties file > select the folder 
-		"D:\Sambit\NetBeansProjects\JavaApplications_Repository\JavaApplicationProject2_JunitTest_Example\src\"					(Java app)
-							OR
-		"D:\Sambit\NetBeansProjects\JavaWebApplication_Repository\WebAppProject3_SimpleServlet_WithDBConnection_UsingJDBC-SQLQuery\web\WEB-INF" (web app)
+		"D:\Sambit\NetBeansProjects\JavaApplications_Repository\<JavaApplicationProject Name>"					
+	
+   The properties file will be added to the Project
 
-	the properties file will be added to the Project
-
-3. All the configurations regarding logging must be declared in the properties file "log4j.properties" or in an XML mile "log4j.xml"
+4. All the configurations regarding logging must be declared in the properties file "log4j.properties" or in an XML mile "log4j.xml"
 	(There are five different levels of logging: DEBUG / INFO / WARN / ERROR / FATAL  )
 	Note:- If the <logging level> is set as "DEBUG", then the logs of all levels ("DEBUG" level or higher than DEBUG) will be written to the log file / console.
 	       If the <logging level> is set as "INFO", then the logs of all levels ("INFO" level or higher than INFO) will be written to the log file / console.
 
-log4j.properties:
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#The Logger gathers the logging information, then gets it to the appender and then the appender prints out the information to a LOG FILE or CONSOLE or a DATABASE TABLE
+	log4j.properties:
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	#The Logger gathers the logs, then gets it to the appender and then the appender prints out the information to a LOG FILE or CONSOLE or a DATABASE TABLE
 
 
-#Root Logger option
-#log4j.rootLogger=<logging level>, <Appender1>, <Appender1>, <Appender1>, .....
-#log4j.logger.<appname>logger=logging level>, <Appender1>, <Appender1>, <Appender1>, .....
+	#Root Logger option
+	#log4j.rootLogger=<logging level>, <Appender1>, <Appender1>, <Appender1>, .....
+	#log4j.logger.<appname>logger=logging level>, <Appender1>, <Appender1>, <Appender1>, .....
 
-log4j.rootLogger=DEBUG, fileOut, fileErrorOut, consoleOut, dbTableOut
-											#DEBUG is the logging level (This will produce logs- "DEBUG" level or higher)
-											#fileOut  - the name of the appender used for writing the logs to a FILE
-											#fileErrorOut - the appender used for writing only the ERROR logs to a FILE 
-											#consoleOut   - the appender used for writing the logs to CONSOLE
-											#dbTableOut   - the appender used for writing the logs to a DATABASE TABLE
-											#sqlConsoleOut- the appender used for writing SQL logs to CONSOLE
-#### set the log4jdbc properties
+	log4j.rootLogger=DEBUG, fileOut, fileErrorOut, consoleOut, dbTableOut
+										#DEBUG is the logging level (This will produce logs- "DEBUG" level or higher)
+										#fileOut  - the name of the appender used for writing the logs to a FILE
+										#fileErrorOut - the appender used for writing only the ERROR logs to a FILE 
+										#consoleOut   - the appender used for writing the logs to CONSOLE
+										#dbTableOut   - the appender used for writing the logs to a DATABASE TABLE
+										#sqlConsoleOut- the appender used for writing SQL logs to CONSOLE
+	#### set the log4jdbc properties
 
-log4j.logger.jdbc.sqlonly=DEBUG,LOg4JDBC 	(/ INFO / WARN / ERROR / FATAL)
-log4j.logger.jdbc.sqltiming=DEBUG,LOg4JDBC	(/ INFO / WARN / ERROR / FATAL)
-log4j.logger.jdbc.audit=OFF
-log4j.logger.jdbc.resultset=ERROR,LOg4JDBC 	(/FATAL)
-log4j.logger.jdbc.connection=ERROR,LOg4JDBC 	(/ FATAL
-log4j.logger.jdbc.resultsettable=ON
-#-Dlog4jdbc.debug.stack.prefix=myservetpackage	(You can tell log4jdbc, from what level you want to capture the SQL execution)
+	log4j.logger.jdbc.sqlonly=DEBUG,LOg4JDBC 	
+	log4j.logger.jdbc.sqltiming=DEBUG,LOg4JDBC	
+	log4j.logger.jdbc.audit=OFF
+	log4j.logger.jdbc.resultset=ERROR,LOg4JDBC 	
+	log4j.logger.jdbc.connection=ERROR,LOg4JDBC 	
+	log4j.logger.jdbc.resultsettable=ON
+	#-Dlog4jdbc.debug.stack.prefix=myservetpackage							(defines from what level you want to capture the SQL execution)
 											
  
 
-#fileOut Appender writes all types of logging level(DEBUG, INFO, WARN, ERROR, FATAL) informations to a LOG FILE
+	#fileOut Appender writes all types of logging level(DEBUG, INFO, WARN, ERROR, FATAL) informations to a LOG FILE
 
-log4j.appender.file=org.apache.log4j.RollingFileAppender 					(defines the type of the appender, here it is a File)
-log4j.appender.file.File=D:\\Sambit\\NetBeansProjects\\LOG4J\\<appName>.log			(defines the path of the appender)
-log4j.appender.file.MaxFileSize=10MB								(defines the maximum size of the appender)
-log4j.appender.file.MaxBackupIndex=10								(Archive log files -maximum number of backup files)
-log4j.appender.file.layout=org.apache.log4j.PatternLayout					(defines the layout of the appender)
-log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd} %5p [%t] (%F:%L) - %m%n		(Pattern to output the caller's file name and line number.)
-
-
-#fileErrorOut Appender writes only the ERROR information to a log file
-
-log4j.appender.fileErrorOut=org.apache.log4j.RollingFileAppender 				(defines the type of the appender, here it is a File)
-log4j.appender.fileErrorOut.threshhold=ERROR							(makes the loggings restricted to only Error level)
-log4j.appender.fileErrorOut.File=D:\\Sambit\\NetBeansProjects\\LOG4J\\<appName>Error.log	(defines the path of the appender)
-log4j.appender.fileErrorOut.MaxFileSize=10MB							(defines the maximum size of the appender)
-log4j.appender.fileErrorOut.MaxBackupIndex=10							(Archive log files -maximum number of backup files)
-log4j.appender.fileErrorOut.layout=org.apache.log4j.PatternLayout				(defines the layout of the appender)
-log4j.appender.fileErrorOut.layout.ConversionPattern=%d{yyyy-MM-dd} %5p [%t] (%F:%L) - %m%n	(Pattern to output the caller's file name and line number.)
+	log4j.appender.file=org.apache.log4j.RollingFileAppender 					(defines the type of the appender, here it is a Rolling File)
+	log4j.appender.file.File=D:\\Sambit\\NetBeansProjects\\SERVER_LOGS_UsingLog4J\\<ProjectName>.log	(defines the path of the appender)
+	log4j.appender.file.MaxFileSize=10MB								(defines the maximum size of the appender)
+	log4j.appender.file.MaxBackupIndex=10								(Archive log files -maximum number of backup files)
+	log4j.appender.file.layout=org.apache.log4j.PatternLayout					(defines the layout of the appender)
+	log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd} %5p [%t] (%F:%L) - %m%n		(defines the layout pattern-<file name>, <line no.>, <time>.. )
 
 
+	#fileErrorOut Appender writes only the ERROR information to a log file
 
-#### stdOut Appender writes all types of logging level(DEBUG, INFO, WARN, ERROR, FATAL) informations to CONSOLE
-
-log4j.appender.stdout=org.apache.log4j.ConsoleAppender						(defines the type of the appender, here it is console)
-log4j.appender.stdout.layout=org.apache.log4j.PatternLayout					(defines the layout of the appender)
-log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd} %5p [%t] (%F:%L) - %m%n		(Pattern to output the caller's file name and line number.)
+	log4j.appender.fileErrorOut=org.apache.log4j.RollingFileAppender 				(defines the type of the appender, here it is a Rolling File)
+	log4j.appender.fileErrorOut.threshhold=ERROR							(makes the loggings restricted to only Error level)
+	log4j.appender.fileErrorOut.File=D:\\Sambit\\NetBeansProjects\\SERVER_LOGS_UsingLog4J\\<ProjectName>Error.log	(defines the path of the appender)
+	log4j.appender.fileErrorOut.MaxFileSize=10MB							(defines the maximum size of the appender)
+	log4j.appender.fileErrorOut.MaxBackupIndex=10							(Archive log files -maximum number of backup files)
+	log4j.appender.fileErrorOut.layout=org.apache.log4j.PatternLayout				(defines the layout of the appender)
+	log4j.appender.fileErrorOut.layout.ConversionPattern=%d{yyyy-MM-dd} %5p [%t] (%F:%L) - %m%n	(defines the layout pattern-<file name>, <line no.>, <time>.. )
 
 
 
-#### dbTableOut Appender writes the error-log to a DATABASE TABLE (You have to create a "LOGS" table in tha "mytestschema" database)
-log4j.appender.dbTableOut=org.apache.log4j.jdbc.JDBCAppender
-log4j.appender.dbTableOut.URL=jdbc:mysql://localhost:3306/mytestschema
-log4j.appender.dbTableOut.driver=com.mysql.jdbc.Driver
-log4j.appender.dbTableOut.user=root
-log4j.appender.dbTableOut.password=nbuser
-log4j.appender.dbTableOut.sql=INSERT INTO LOGS VALUES ('%x', now() ,'%C','%p','%m')
-log4j.appender.dbTableOut.layout=org.apache.log4j.PatternLayout
+	#### consoleOut Appender writes all types of logging level(DEBUG, INFO, WARN, ERROR, FATAL) informations to CONSOLE
+
+	log4j.appender.consoleOut=org.apache.log4j.ConsoleAppender					(defines the type of the appender, here it is console)
+	log4j.appender.consoleOut.layout=org.apache.log4j.PatternLayout					(defines the layout of the appender)
+	log4j.appender.consoleOut.layout.ConversionPattern=%d{yyyy-MM-dd} %-5p [%t] (%F:%L) - %m%n	(defines the layout pattern-<file name>, <line no.>, <time>.. )
 
 
-#### sqlConsoleOut Appender writes JDBC-SQL related log informations to CONSOLE
+
+	#### dbTableOut Appender writes the error-log to a DATABASE TABLE (You have to create a "LOGS" table in tha "mytestschema" database)
+	
+	log4j.appender.dbTableOut=org.apache.log4j.jdbc.JDBCAppender					(defines the type of the appender, here it is a Database Table)
+	log4j.appender.dbTableOut.URL=jdbc:mysql://localhost:3306/mytestschema				(defines the database name)
+	log4j.appender.dbTableOut.driver=com.mysql.jdbc.Driver						(defines the database driver)					
+	log4j.appender.dbTableOut.user=root								(defines the user credential to access the Database)
+	log4j.appender.dbTableOut.password=nbuser							(defines the password)
+	log4j.appender.dbTableOut.sql=INSERT INTO LOGS VALUES ('%x', now() ,'%C','%p','%m')		(defines the fields in the LOGS table)
+	log4j.appender.dbTableOut.layout=org.apache.log4j.PatternLayout					(defines the layout pattern-<file name>, <line no.>, <time>.. )
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+5. If database operations are involved in the application, then changes the JDBC driver and JDBC connection string wherever it is mentioned.
 		
-log4j.appender.sqlConsoleOut=org.apache.log4j.ConsoleAppender
-log4j.appender.sqlConsoleOut.layout=org.apache.log4j.PatternLayout
-log4j.appender.sqlConsoleOut.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+			com.mysql.jdbc.Driver 			to 		net.sf.log4jdbc.DriverSpy 
+			jdbc:mysql://localhost:3306/test 	to 		jdbc:log4jdbc:mysql://localhost:3306/mytestschema
 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-4. Implement Log4J in a Java application
-   --------------------------------------
-	1. Change JDBC Driver  from com.mysql.jdbc.Driver to 					net.sf.log4jdbc.DriverSpy 
-		Change MySQL JDBC Connection string from jdbc:mysql://localhost:3306/test to 	jdbc:log4jdbc:mysql://localhost:3306/mytestschema
-
-
-	2. Import the Logger and PropertyConfigurator in the application class
+6. Import the Logger and PropertyConfigurator in the application class
+			
 			Code:- 
 				import org.apache.log4j.Logger;
 				import org.apache.log4j.PropertyConfigurator;
 	
-	3. Create a logger object inside the class:
+7. Create a logger object inside the class:
+			
+			Code:- 
+				final static Logger logger = Logger.getLogger(<classname>.class);
 
-			final static Logger logger = Logger.getLogger(<classname>.class);
+8. Inside the the main() method, configure the properties file
 
-	4. Inside the the main() method, configure the properties file
+			Code:- 
+				PropertyConfigurator.configure("log4j.properties");
 
-		PropertyConfigurator.configure("log4j.properties");
+9. Inside the main() method, Use the logger object to print specific information to the log file
 
-	5. Inside the main() method, Use the logger object to print specific information to the log file
+			Code:- 
+				logger.info("successful");
 
-		logger.info("successful");
-
-	6. If you think a particular job execution may give error at run time, then you can put that part in the try block and catch the error through logger.error
-		Code :- 
-			try{
+10. If you think a particular job execution may give error at run time, then you can put that part in the try block and catch the error through logger.error
+			Code :- 
+				try{
                    
-                    		new ReadFromFile("D:/myTestFile.txt");     // a file is being read by invoking the constructor of the class "ReadFromFile"
-                	}
-			catch(Exception e){
-                    		logger.error("Error while Reading from the File"+e.getMessage());	// Error is captured and printed to the log file
-                	}
+                    			new ReadFromFile("D:/myTestFile.txt");     // a file is being read by invoking the constructor of the class "ReadFromFile"
+                		}
+				catch(Exception e){
+                    			logger.error("Error while Reading from the File"+e.getMessage());	// Error is captured and printed to the log file
+                		}
 
-	7. Run the application
+11. Run the application
 
-	A log file "logging.log" containing all types of logs (DEBUG, INFO, WARN, ERROR, FATAL)  will be created under the folder D:\Sambit\NetBeansProjectsLOG4J\LOG4J
-	A log file "loggingError.log" containg only the ERROR logs will be created under the folder D:\Sambit\NetBeansProjectsLOG4J\LOG4J 
+	A log file "<ProjectName>.log"      will be created under the folder D:\Sambit\NetBeansProjects\SERVER_LOGS_UsingLog4J
+	A log file "<ProjectName>Error.log" will be created under the folder D:\Sambit\NetBeansProjects\SERVER_LOGS_UsingLog4J 
+
 
 	
 
-5. Implement Log4J in a Web application
-   ----------------------------------------
+Implement Log4J in a Web Application
+----------------------------------------
+1. Download the following JAR files:
+				log4j-1.2.17.jar 
+				log4jdbc-1.2.jar  
+				slf4j-api-1.7.5.jar
+				slf4j-log4j12-1.7.5.jar
+   
+	Note:- 
+		If there is no Database operations involved, then you need only the LOG4J JAR file (log4j-1.2.17.jar ) to provide the application logs
+	  	If there is database operation involved, then you also need the LOG4JDBC JAR files (log4jdbc-1.2.jar, slf4j-api-1.7.5.jar, slf4j-log4j12-1.7.5.jar )
 
-	1. Change JDBC Driver  from com.mysql.jdbc.Driver to 					net.sf.log4jdbc.DriverSpy 
-		Change MySQL JDBC Connection string from jdbc:mysql://localhost:3306/test to 	jdbc:log4jdbc:mysql://localhost:3306/mytestschema
+2. Add the following jars to the Project's librarry
+	
+	NetBeans IDE - Right Click the Project > Properties > libraries > ADD JAR > select required JAR file(s) > OK
 
-	2. Import the Logger and PropertyConfigurator in the servlet class
+	Now the JAR files will appear in the
+		NetBeans IDE <project tab> / <project name> / libraries 
+	
+	and also appear in the folder
+		D:\Sambit\NetBeansProjects\JavaWebApplication_Repository\WebAppProject6_ControllerServlet_WithDBConnection_UsingEJB-Transaction\build\web\WEB-INF\lib
+
+	Also put the jar files in the glassfish library folder-
+							C:\Program Files\glassfish-4.1\glassfish\domains\domain1\lib\
+			
+3. Create "log4j.properties" file 
+	Right click source > new > other > properties file > select the folder 
+		
+		"D:\Sambit\NetBeansProjects\JavaWebApplication_Repository\<WebApplicationProject Name>\web\WEB-INF" 			
+
+	The properties file will be added to the Project
+
+
+4. All the configurations regarding logging must be declared in the properties file "log4j.properties" or in an XML mile "log4j.xml"
+	
+	(There are five different levels of logging: DEBUG / INFO / WARN / ERROR / FATAL  )
+	Note:- If the <logging level> is set as "DEBUG", then the logs of all levels ("DEBUG" level or higher than DEBUG) will be written to the log file / console.
+	       If the <logging level> is set as "INFO", then the logs of all levels ("INFO" level or higher than INFO) will be written to the log file / console.
+
+	log4j.properties:
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	#The Logger gathers the logs, then gets it to the appender and then the appender prints out the information to a LOG FILE or CONSOLE or a DATABASE TABLE
+
+
+	#Root Logger option
+	#log4j.rootLogger=<logging level>, <Appender1>, <Appender1>, <Appender1>, .....
+	#log4j.logger.<appname>logger=logging level>, <Appender1>, <Appender1>, <Appender1>, .....
+
+	log4j.rootLogger=DEBUG, fileOut, fileErrorOut, consoleOut, dbTableOut
+										#DEBUG is the logging level (This will produce logs- "DEBUG" level or higher)
+										#fileOut  - the name of the appender used for writing the logs to a FILE
+										#fileErrorOut - the appender used for writing only the ERROR logs to a FILE 
+										#consoleOut   - the appender used for writing the logs to CONSOLE
+										#dbTableOut   - the appender used for writing the logs to a DATABASE TABLE
+										#sqlConsoleOut- the appender used for writing SQL logs to CONSOLE
+	#### set the log4jdbc properties
+
+	log4j.logger.jdbc.sqlonly=DEBUG,LOg4JDBC 	
+	log4j.logger.jdbc.sqltiming=DEBUG,LOg4JDBC	
+	log4j.logger.jdbc.audit=OFF
+	log4j.logger.jdbc.resultset=ERROR,LOg4JDBC 	
+	log4j.logger.jdbc.connection=ERROR,LOg4JDBC 	
+	log4j.logger.jdbc.resultsettable=ON
+	#-Dlog4jdbc.debug.stack.prefix=myservetpackage							(defines from what level you want to capture the SQL execution)
+											
+ 
+
+	#fileOut Appender writes all types of logging level(DEBUG, INFO, WARN, ERROR, FATAL) informations to a LOG FILE
+
+	log4j.appender.file=org.apache.log4j.RollingFileAppender 					(defines the type of the appender, here it is a Rolling File)
+	log4j.appender.file.File=D:\\Sambit\\NetBeansProjects\\SERVER_LOGS_UsingLog4J\\<appName>.log	(defines the path of the appender)
+	log4j.appender.file.MaxFileSize=10MB								(defines the maximum size of the appender)
+	log4j.appender.file.MaxBackupIndex=10								(Archive log files -maximum number of backup files)
+	log4j.appender.file.layout=org.apache.log4j.PatternLayout					(defines the layout of the appender)
+	log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd} %5p [%t] (%F:%L) - %m%n		(defines the layout pattern-<file name>, <line no.>, <time>.. )
+
+
+	#fileErrorOut Appender writes only the ERROR information to a log file
+
+	log4j.appender.fileErrorOut=org.apache.log4j.RollingFileAppender 				(defines the type of the appender, here it is a Rolling File)
+	log4j.appender.fileErrorOut.threshhold=ERROR							(makes the loggings restricted to only Error level)
+	log4j.appender.fileErrorOut.File=D:\\Sambit\\NetBeansProjects\\SERVER_LOGS_UsingLog4J\\<appName>Error.log	(defines the path of the appender)
+	log4j.appender.fileErrorOut.MaxFileSize=10MB							(defines the maximum size of the appender)
+	log4j.appender.fileErrorOut.MaxBackupIndex=10							(Archive log files -maximum number of backup files)
+	log4j.appender.fileErrorOut.layout=org.apache.log4j.PatternLayout				(defines the layout of the appender)
+	log4j.appender.fileErrorOut.layout.ConversionPattern=%d{yyyy-MM-dd} %5p [%t] (%F:%L) - %m%n	(defines the layout pattern-<file name>, <line no.>, <time>.. )
+
+
+
+	#### consoleOut Appender writes all types of logging level(DEBUG, INFO, WARN, ERROR, FATAL) informations to CONSOLE
+
+	log4j.appender.consoleOut=org.apache.log4j.ConsoleAppender					(defines the type of the appender, here it is console)
+	log4j.appender.consoleOut.layout=org.apache.log4j.PatternLayout					(defines the layout of the appender)
+	log4j.appender.consoleOut.layout.ConversionPattern=%d{yyyy-MM-dd} %-5p [%t] (%F:%L) - %m%n	(defines the layout pattern-<file name>, <line no.>, <time>.. )
+
+
+
+	#### dbTableOut Appender writes the error-log to a DATABASE TABLE (You have to create a "LOGS" table in tha "mytestschema" database)
+	
+	log4j.appender.dbTableOut=org.apache.log4j.jdbc.JDBCAppender					(defines the type of the appender, here it is a Database Table)
+	log4j.appender.dbTableOut.URL=jdbc:mysql://localhost:3306/mytestschema				(defines the database name)
+	log4j.appender.dbTableOut.driver=com.mysql.jdbc.Driver						(defines the database driver)					
+	log4j.appender.dbTableOut.user=root								(defines the user credential to access the Database)
+	log4j.appender.dbTableOut.password=nbuser							(defines the password)
+	log4j.appender.dbTableOut.sql=INSERT INTO LOGS VALUES ('%x', now() ,'%C','%p','%m')		(defines the fields in the LOGS table)
+	log4j.appender.dbTableOut.layout=org.apache.log4j.PatternLayout					(defines the layout pattern-<file name>, <line no.>, <time>.. )
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+5. If database operations are involved in the application, then changes the JDBC driver and JDBC connection string wherever it is mentioned.
+		
+			com.mysql.jdbc.Driver 			to 		net.sf.log4jdbc.DriverSpy 
+			jdbc:mysql://localhost:3306/test 	to 		jdbc:log4jdbc:mysql://localhost:3306/mytestschema
+
+6. Import the Logger and PropertyConfigurator in the servlet class
 			Code:- 
 				import org.apache.log4j.Logger;
 				import org.apache.log4j.PropertyConfigurator;
 	
-	3. Create a logger object inside the servlet class:
+7. Create a logger object inside the servlet class- 
 
 			final static Logger logger = Logger.getLogger(<classname>.class);
 
-	4. In the web.xml, Define how the properties file will be used from the servlet  
+8. In the web.xml, Define how the servlet will locate properties file 
 
 			Code:-
 				<servlet>
@@ -382,9 +677,9 @@ log4j.appender.sqlConsoleOut.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-
     				</servlet>
 
 	
-	5. Inside the the init() method of the servlet, configure the properties file
+9. Configure the properties file in the Servlet's init() or doGet() or doPost() depending on the requirement:
 
-		PropertyConfigurator.configure(<path of the properties file>); 
+		PropertyConfigurator.configure(<dynamic path of the properties file>); 
 		
 		
 		Note:- The build process will copy the properties file from <project directory>\Web\WEB-INF to  <project directory>\build\web\WEB-INF
@@ -399,15 +694,14 @@ log4j.appender.sqlConsoleOut.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-
 			initFilePath = getInitParameter("log4j-init-file");  //refers"web.xml", picks corresponding value of "<param-name>log4j-init-file</param-name>"
 									       (WEB-INF/log4j.properties) 
 		
-		
-				
 
-	6. Inside the get() method, Use the logger object to print specific information to the log file
+10. Inside the doGet() / doPost() method, Use the logger object to print specific information to the log file
 			Example Code:-
 				logger.info("the passed query string customer name = "+ customer_name);
             			logger.debug("query string to print out:"+ customer_name);
 
-	7. If you think a particular job execution may give error at run time, then you can put that part in the try block and catch the error through logger.error
+
+11. If you think a particular job execution may give error at run time, then you can put that part in the try block and catch the error through logger.error
 			Example Code :- 
 				try{
                    
@@ -417,10 +711,10 @@ log4j.appender.sqlConsoleOut.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-
                     			logger.error("Error while executing query"+sqle.getMessage());	// Error is captured and printed to the log file
                 		}
 
-	8. Run the application
+12. Run the application
 	
-	A log file "logging.log" containing all types of logs (DEBUG, INFO, WARN, ERROR, FATAL)  will be created under the folder D:\Sambit\NetBeansProjectsLOG4J\LOG4J
-	A log file "loggingError.log" containg only the ERROR logs will be created under the folder D:\Sambit\NetBeansProjectsLOG4J\LOG4J 
+	A log file "<Project name>.log"  will be created under the folder D:\Sambit\NetBeansProjectsLOG4J\SERVER_LOGS_UsingLog4J
+	A log file "<Project name>Error.log" will be created under the folder D:\Sambit\NetBeansProjectsLOG4J\SERVER_LOGS_UsingLog4J 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -507,8 +801,6 @@ Maven will package the application to JAR (if it is a Java Application project)
 Github commands
 =============================
 
-
-
 Steps to remove directory from githun repository
 ----------------------------------------------------
 git rm -r --cached FolderName
@@ -530,7 +822,7 @@ git push origin master
 
 
 
-Managing Java Project (file versioning) in GITHUB 
+Managing Projects (file versioning) in GITHUB 
 =============================================================
 
 
@@ -551,8 +843,8 @@ Creating a Repository in Github and cloning the repository to local computer (fo
 				> Clone completed
 				  A new folder "JavaWebApplication_Repository" is created under D:\Sambit\NetBeansProjects\
 
-Creating a Project under the Repository (locally using NetBeans IDE)
----------------------------------------------------------------------
+4. Creating a Project under the Repository (locally using NetBeans IDE)
+
 								
 				> Dialogbox - Do you want to create an IDE project from the cloned sources?
 				> Click "Create Project"
@@ -564,21 +856,21 @@ Creating a Project under the Repository (locally using NetBeans IDE)
 						
 							
 
-Create any File(s) under the Project (locally using NetBeans IDE)
--------------------------------------------------------------------
+5. Create any File(s) under the Project (locally using NetBeans IDE)
+
 				> Create a JSP file - "employeeDetails.jsp" in the Project "WebAppProject7"
 					
 
 
 
-Commit the changes to the Files(Add file/Modify File and Delete file) in Local folder
--------------------------------------------------------------------------------------
+6. Commit the changes to the Files(Add file/Modify File and Delete file) in Local folder
+
 				> commit the changes (add/modify a file-"employeeDetails.jsp") by right clicking the project > Git > Commit
 
 
 
-Push the changes to the remote github repository
-------------------------------------------------------------
+7. Push the changes to the remote github repository
+
 
 				> Push the changes(add/modify a file-"employeeDetails.jsp") by right clicking the project > Git > remote > push 
 																	remote name: origin
@@ -586,7 +878,30 @@ Push the changes to the remote github repository
 				> Verify the Github Page now
 				  A new Project "WebAppProject7" will appear under the repository "JavaWebApplication_Repository"
 				  A new file "employeeDetails.jsp" will appear under the Project "WebAppProject7"							    
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Creating a New Project in an existing Github repository
+------------------------------------------------------------
+
+1. Create a Netbeans Project under a folder D:\Sambit\
+	NetBeans IDE > New > Project > web app project > Project Name : TestWebAppProject
+
+2. The Project is created under  D:\Sambit\TestWebAppProject
+
+3. Now Move the TestWebAppProject folder to D:\Sambit\NetBeansProjects\JavaWebApplication_Repository
+
+4. NetBeans IDE -> 
+	Right click the Project > commit
+	Right click the Project > remote > push 
+					   (Specify the Git repository location : https://github.com/mynamesahu/JavaWebApplication_Repository.git)
+
+5. The new Project is now added to the existing "JavaWebApplication_Repository" repository
+
+
+
+
+Making an already existing Netbeans project as a Github repository project
+---------------------------------------------------------------------------
+
 If there is a project already existing in Netbeans (D:\Sambit\NetBeansProjects\WebAppProject1) and not in Github repository, 
 You can push the Project to the Github repository by following steps:
 
@@ -614,9 +929,9 @@ The project will disappear from the NetBeans Project Tab.
   			to the newly created folder (D:\Sambit\NetBeansProjects\JavaWebApplication_Repository\WebAppProject1)
 
 
-4. Open the Project in NetBeans
-------------------------------------------------------------------------
-NetBeans IDE -> File > "Open Project" 
+5. Open the Project in NetBeans
+
+			NetBeans IDE -> File > "Open Project" 
 				> Browse to the folder "D:\Sambit\NetBeansProjects\JavaWebApplication_Repository\WebAppProject1"
 				> Select the Project
 				> Open the Project
@@ -624,22 +939,21 @@ NetBeans IDE -> File > "Open Project"
 				 A new Project "WebAppProject1" appears under the Project tab of NetBeans IDE
 
 
-Commit the new project in Local folder
---------------------------------------
+6. Commit the new project in Local folder
+
 				> right clicking the project > Git > Commit
 
 
 
-Push the project to the remote github repository
-------------------------------------------------
+7. Push the project to the remote github repository
 
 				> right clicking the project > Git > remote > push
 				> Verify the Github Page now
 				A new Project "WebAppProject1" will appear under the repository "JavaWebApplication_Repository"
 											    
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-File checkout:-
-----------------------
+
+Checking out a File :-
+--------------------------
 If more than one person are working on the same file, then the file should be checked out first by one person.
 Once the file is checkout, it will be locked => others can't work on that file
 After the work on the file is completed, the file must be checked in 
@@ -676,6 +990,247 @@ How to push your Git repository to an external server
 
 
 
+HOW TO CONFIGURE MYSQL DATABASE SERVER and CREATE A DATABASE INSTANCE / SCHEMA
+=================================================================================
+1. Create a Web Application Project in NetBeans IDE
+		Project folder path - C:\Sambit\NetBeansProject\<ProjectName>
+
+2. Install MySQL Server
+
+		Download MySQL server ZIP file
+		Unzip the ZIP file to a folder 
+						D:\Sambit\NetBeansProjects\MySQL
+
+		Add the mysql commands to your PATH (environment variable)
+						
+						set Path  D:\Sambit\NetBeansProjects\MySQL\bin\
+3. Check if the MySQL Server is Running
+	
+	
+	Open a command-line prompt window:
+
+		C:\>mysqld			(start server) 
+	
+		C:\> mysqladmin ping
+			 
+		    output:- mysqld is alive	(server is running)
+
+
+
+		C:\> mysqladmin shutdown	(shut down the server)
+
+
+	Change the "root" account Password
+
+		C:\> mysql -u root
+		mysql> UPDATE mysql.user SET Password = PASSWORD('nbuser') WHERE User = 'root';
+ 		mysql> FLUSH PRIVILEGES;
+
+
+		
+										
+4. Register MySQL server in NetBeans IDE
+
+		NetBeans IDE -> services Tab -> Right click Databases > Register MySQL Server >
+
+		MySQL server properties window opens
+		
+		Set the Basic Properties:
+		
+					host name : 		localhost
+					port number:		3306
+					Admin user name:	root
+					Admin password:		nbuser
+		
+		MYSQL server is now registered in the NetBeans IDE.
+		
+		Note:-
+		The Glassfish application server requires an appropriate driver to enable communication between your Java program and the the MySQL database. 
+		So You need to download the MySQl server driver (jar file -"mysql-connector-java-5.1.41-bin.jar") and put in the Glassfish server library (lib folder)
+
+		The good is, the NetBenas IDE already contains the MySQL(Connector/J) driver, so you do not need to download it. 
+		
+		You need to just Enable JDBC driver deployment in the Glassfish server settings, so that the driver will be automatically deployed to GlassFish server.
+
+			NetBens IDE -> Services Tab -> Servers -> 
+							Right Click GlassfisgServer 4.1 > Properties > Enable JDBC Driver Deployment
+
+5. Configure the NetBeans IDE to START / STOP the MySQL server 
+
+		NetBeans IDE -> services Tab -> Databases > Right Click MySQL server > Properties
+		
+		MySQL server properties window opens
+		
+		Set the Admin Properties:
+					
+					Path/URL to Admin Tool : D:\Sambit\NetBeansProjects\MySQL\bin\mysqladmin.exe
+					Path to start command:	 D:\Sambit\NetBeansProjects\MySQL\bin\mysqld.exe
+					Path to stop command:	 D:\Sambit\NetBeansProjects\MySQL\bin\mysqladmin.exe
+								 					(Arguments : -u root -p nbuser shutdown)
+
+6. Create a Database Instance
+		
+		Right click the MySQL Server node > Create Database.
+
+				New Database Name : 	mytestschema
+				Grant Full Access To : 	root@localhost 		(=>root account on the localhost host has full access the "mytestschema" database)
+ 
+		A new database instance "mytestschema" is created under a link 
+							jdbc:mysql://localhost:3306/mytestschema [root on Default schema]
+		
+
+					You can create tables under this database instance
+
+						mytestschema > Right click Tables > Create Table
+		
+		Note:-
+			"mytestschema" database is created in the MySQL server which runs on 		port 3306 of localhost
+			"myTestPool" Connectionpool is created in the Glassfish server which runs on 	port 4848 of local host
+					
+			So you have to provide "root user" credentials to the connection pool so that the glassfish server can access the "mytestschema" database. 
+
+
+		
+	Alternatively, You can create database schema using MySQL Work bench (which is a GUI based tool to create tables and ERD diagram and generate DDL script)	
+		
+
+Creating Database schema using MySQL Work bench
+--------------------------------------------------------
+
+1. Open MySQL Work bench 
+
+		Download MySQL workbench 
+		Install MySQL workbench
+
+2. Create a schema - "mytestschema"
+	
+		File > New Model > Click the plus(+) icon located to the upper right corner 
+		Name of schema - mytestschema
+		collation -	utf8-utf8_unicode_ci
+		Save to a file under C:\Sambit\NetBeansProject\<ProjectName>\mytestschema.mwb
+		Schema is created.
+ 		
+		"mytestschema" will automatically get created under MYSQL server
+
+
+3. Open an empty ERD Diagram canvas in the schema
+
+		Click Model > Create Diagram from Catalog Objects.
+
+		A new EER Diagram opens displaying an empty canvas. 
+
+
+4. create entities in the ERD diagram (relation between the entities)
+
+		Click the New Table icon located in the left margin > select the mytestschema from the dropdown box > hover your mouse onto the canvas > click again. 
+
+		A new entity displays on the canvas 
+
+		In the catalog tree, the new table will appear under mytestschema \ table1 (default table name)
+
+		
+		Double Click the table > 
+
+		The entity editor opens
+
+		Specify the followings :
+					Name: 		customer		(name of the entity)
+					Engine: 	InnoDB			(The InnoDB engine provides foreign key support) 
+					Comments: 	xxxxxxx
+
+		Save the changes
+				File > save Model
+
+ 		In the catalog tree, the table will be modified to mytestschema \ customer 
+		
+		The newly created entity is now "customer"
+
+
+5. Create Properties for the entity
+
+		Now that you've added entity to the canvas, you need to specify their properties (columns in a database table).
+
+		
+		In the Table editor ->  Double Click the first row below propery headings  > Add following details for the first property of "student" enity:
+
+					Column Name- 		stud_id
+					Data Type- 		INT
+					Checkbox select:  	PK		   NN		UN		AI  			
+							      (Primary Key)  	(Not Null)   (Unsigned)	    (Auto Increment) 
+											   
+										
+					 
+					Double Click the second row  > Add following details for the second property of the "student" entity:
+
+					Column Name- 		stud_name
+					Data Type- 		VARCHAR
+					Checkbox select:  	NN 
+
+					
+					Double Click the third row  > Add following details for the third property of the "student" entity:
+
+					Column Name- 		stud_address
+					Data Type- 		VARCHAR
+					Checkbox select:  	NN 
+
+					
+					Double Click the fourth row  > Add following details for the fourth property of the "student" entity:
+
+					Column Name- 		stud_DOB
+					Data Type- 		DATE
+					Checkbox select:  	NN 
+
+					and so on ......
+
+		Close the Table Editor window to view the table clearly on the canvas
+
+		To resize the table for  all columns to be visible on the canvas
+					choose Arrange > Reset Object Size 
+
+ 
+		To view the Table indexes
+					Click the Indexes row  
+
+		Save the changes.
+
+6. Repeat steps 4 and 5 for creating each new entity and their peoperties
+
+
+7. Generate DDL script by forward Engineering
+	
+		File > Export > Forward Engineer SQL CREATE Scipt (Ctrl+Shift+G) > 
+							Output SQL script file path : 	D:\Sambit\NetBeansProjects\<ProjectName>\
+							file name 	       	    :	mytestschema_DDLscript.sql 
+
+
+			      > Next
+
+			      > In the SQL Object Export Filter window, select checkbox for "Export My SQL Table Objects" 
+
+			      > Finish
+
+		The DDL script is created 
+				C:\Sambit\NetBeansProjects\<ProjectName>\mytestschema_DDLscript.sql 
+
+
+8. Create a Database schema on MySQL Database from the ERD (by running the DDL script)
+
+
+	Run the DDL script in the MY SQL Database server
+
+		NetBeans IDE -> Services Tab -> MySQL server > Right click any existing schema > connect
+
+						The link jdbc:mysql://localhost:3306/<any existing schema name> [root on Default schema] appears
+
+						Right click the link > Execute command > copy the content of the DDL script and paste in the script execution window
+						
+						> Run SQL
+		
+		"mytestschema" will be created under MySQL server
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 
 
 
@@ -699,9 +1254,6 @@ Alternatively, You can manually add the JDBC driver to the Glassfish application
 2. Then Copy the JAR file into the library folder of Glassfish application server -> C:\Program Files\glassfish-4.1\glassfish\domains\domain1\lib\
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
 
 
 
@@ -927,6 +1479,17 @@ If you don't want to create an entry in the "web.xml" file to refer to the data-
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 ################################# END USEFUL HINTS ###############################################################################################
 
 
@@ -948,7 +1511,7 @@ If you don't want to create an entry in the "web.xml" file to refer to the data-
 
 
 
-################################################## JAVA WEB APPLICATIOn PROJECTS ##############################################################
+################################################## My JAVA WEB APPLICATIOn PROJECTS Created in Net Beans##############################################################
 
 
 
@@ -1349,7 +1912,7 @@ Invoke the servlet 		in NetBeans -> right click the servlet file --> Run
 
 
 
-#################################################### JAVA APPLICATIOn PROJECTS ##############################################################
+#################################################### My JAVA APPLICATIOn PROJECTS created in Net Beans ##############################################################
 
 
 JavaApplicationProject1
