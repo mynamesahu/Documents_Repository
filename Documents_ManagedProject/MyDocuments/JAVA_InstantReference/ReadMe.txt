@@ -5,8 +5,6 @@
 
 
 
-
-
 ########################################## USEFUL HINTS ############################################################
 
 
@@ -68,23 +66,252 @@ Right click anywhere in the coding page > insert code 	-> it will give you many 
 
 
 
-Java Program structure
-================================
+
+
+
+Java Application set up and structure
+==========================================
 1. Add JDK bin folder to the PATH
-		set path C:\Program Files\Java\jdk1.8.0_111\bin 			(all the JAVA compile commands are in this folder)
+		set path C:\Program Files\Java\jdk1.8.0_111\bin 			(all the JAVA compile time command softwares (JDK) are in this folder)
 
 2. Add the library folder to the CLASSPATH
-		set classpath C:\Program Files\Java\jre1.8.0_131\lib 			(all the necessary jar files, usesd at run time are present in this folder)
+		set classpath C:\Program Files\Java\jre1.8.0_131\lib 			(all the jar files, usesd at run time (JRE) are present in this folder)
 
 3. Add the required JAR files to the Project library					(for example add "log4j-1.2.17.jar" to the Java application Project's library)
  
-4. In case of web application, put the required JARs in the server's library folder 	(c:/programfiles/glassfish/domains/domain1/lib)
+ 				In case of web application, 
+				put the required JARs in the server's library folder 	(c:/programfiles/glassfish/domains/domain1/lib)
 
-3. Import the required libraries(present in the JAR) in the JAVA application		(Ex:- "import import org.apache.log4j.Logger;" )
+4. Import the required libraries(present in the JAR) in the JAVA application		(Ex:- "import import org.apache.log4j.Logger;" )
 
-4. Use the library's class in the Program						(Ex:- "Logger" class  )	
+5. Use the library's class in the Program						(Ex:- "Logger" class  )	
 				
-5. Instantiate the class and use the method of the class in the Java application 	(Ex:- The class's getLogger() method returns an object ->used for loggings)
+6. Instantiate the class and use the method of the class in the Java application 	(Ex:- The class's getLogger() method returns an object ->used for loggings)
+
+
+
+
+
+
+
+How to import libraries in JAVA / JSP
+===============================================
+
+Import libraries in JAVA
+---------------------------
+1. The library classes are usually bundled in a JAR file
+
+2. You have to first Add the JAR file to the project Library, 
+
+3. Then in the Java Program, you have to import the required JAR file-class with proper hierarchy, so that the your Java program can recognize the JAR file-class(es) 
+
+						Example Code:-
+							import org.apache.log4j.Logger;
+
+4. Now your Java Program recognizes the Logger class of the LOG4J JAR file (log4j-1.2.17.jar)
+
+5. Then you can instantiate the Logger class 
+
+						Example Code:-
+							Logger logger = Logger.getLogger(ControllerServletInvokingEJBSessionBean.class );
+
+6. Then you can use the Logger class's properties / methods through that instance ("logger")
+
+						Example Code:-
+							logger.info()
+
+Import libraries in JSP
+---------------------------
+
+1. Similarly, in JSP you can use external librariesby using <%@taglib> 	-> stands for "tag library"
+
+						
+2. You have to import the required libraries ("core" and "sql")  to use their utilities in the JSP program
+							
+						Example Code:-
+							<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+							<%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
+
+
+3. Here you are importing the core library and instantiating it to a reference "c"
+	you are importing the sql  library and instantiating it to a reference "sql"
+
+
+4. Then you can use the core library's  properties / methods through the instance "<c:XXX ---- />"
+
+						Example Code:-
+							<c:forEach var="customer" items="${customerDetails}">    
+            							
+                						<c:out value="${customer.custName}" /> 
+            
+        						</c:forEach>
+	
+	you can use the sql  library's  properties / methods through the instance "<sql:XXX --- />"
+						Example Code:-
+							<sql:update var="customerInsertResult" dataSource="jdbc/myTestDataSource">
+                						INSERT INTO customer (cust_name, cust_address, cust_email)
+                						<%VALUES ("${param.txt_Name}", "${param.txt_Addr}", "${param.txt_Email}")%>               
+            						</sql:update>
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+
+
+
+
+
+
+
+How to capture the user inputs in the servlet or JSP
+=============================================================
+The user input can be passed through query string or query parameter or form submit or init-param setting in web.xml or context parameter setting for the application
+		
+		query String Example1 :-
+			
+				http://localhost:8080/customer.jsp?"Sambit"
+
+		query parameter Example1 :-
+				http://localhost:8080/customer.jsp?custName=Sambit&custAddress=Pune
+		
+		Form-submit example :-
+
+				<input type= text name = "custName">
+
+
+		init-param setting in web.xml
+				
+				</servlet>
+
+					<servlet name="Myservlet">
+					<servlet class="MyServlet.class">
+					<init-param>
+						<param name="custName" >
+						<param value="Sambit">
+					</init-param
+				
+				</servlet>
+	
+		parameter set in servlet context
+
+				getServletContext().setAttribute("customerDetails",customerFacade.findAll()); 
+	
+ 
+In Servlet:
+------------									
+		request.getQueryString()
+
+				or
+
+		request.getParameter("custName")
+
+				or 
+
+		getInitParameter().getAttribute("custName")		->The init parameter can be set in "web.xml" for a particular servlet
+
+				or 
+
+		getContextParameter().getAttribute("customerDetails")	->The context parameter can be set for the entrire application across multiple servlets
+		
+
+
+In JSP
+--------					
+			
+		<%= request.getParameter("custName")%> 
+
+				or
+
+		<%=pageContext.request.queryString%> 
+		
+
+
+In JSP (with core / sql tag library)
+-------------------------------------
+
+		<c:set var="custName" value="${param.custName}" />  
+
+				or
+
+		<c:set var="custName" value="${initParam.custName}" />
+				
+				or
+
+		<c:set var="custName" value="${customerDetails}" />
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------			
+
+
+
+
+
+
+
+
+
+
+How to use if or Choose...when in JSP core tag
+====================================================
+
+Logic to be implemented:- 
+
+	 If customer name is submitted as user input, then Print the customer name, 
+	 Else, Ask the user to provide customer name
+
+
+
+If condition
+------------
+
+	<c:if test="${!empty param.custName}">
+
+            		<c:out value="${param.custName}" /> 
+        
+	</c:if>
+
+	<c:otherwise>
+		
+    			Please provide the customer name </br>	
+
+        </c:otherwise>
+
+
+Choose .. When
+--------------
+
+	<c-rt:choose>
+
+        	<c-rt:when test="${!empty param.custName}">
+
+    			Welcome <c-rt:out value="${param.custName}" />. 
+
+        	</c-rt:when>
+
+        	<c-rt:otherwise>
+		
+    			Please provide your name </br>	
+
+        	</c-rt:otherwise>
+
+	</c-rt:choose>
+
+coditional checking
+----------------------
+	<c:if test="${!empty customerEdited}">     		(Checking non empty variable)
+
+ 	<c:if test="${customerEdited.equals('yes')}">		(checking the variable's string value)
+
+	<c:if test="${customerID == 1}">			(checking the variable's integer value)
+
+	<c:if test="${numberOfStudents >= 40}">			(comparing the variable's integer value)
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
 
 
 
@@ -285,7 +512,7 @@ In the servlet class,
 
 
 
-how to create a WAR file from the Web application
+How to create a WAR file from the Web application
 ===================================================
 NetBeans IDE > Right click your project > Click "Clean and Build" 
 The war file "<Project name>.war" will be created under the "dist" folder of your app
@@ -330,41 +557,6 @@ Access the Web applicaion through the URL:
 
 
 
-How to capture the user inputs in the servlet or JSP
-=============================================================
-
-http://localhost:8080/customer.jsp?first_name=Sambit&last_name=Sahu
-The values passed as query string can be retrieved 
-in JSP as 				<%= request.getParameter("first_name")%> or 
-					
-					
-
-
-
-The requested query string can be retrieved as follows:
-in JSP as -				<%=pageContext.request.queryString%> 	
-in servlet as-				request.getQueryString()		
-
-
-The context parameter(Ex:-"imagePath") can be set in "web.xml" file 
-This can be retrieved later
-in JSP as- 				<c:out value="${initParam.imagePath}" />
-in servlet as-				request.getContextParameter().getAttribute("imagePath")
-
-
-If a value is submitted through a form text field, it can be retrieved as follows:
-in JSP -				${param.txt_Name}
-					or 
-					<%= request.getParameter("txt_Name")%>
--------------------------------------------------------------------------------------------------------			
-
-
-
-
-
-
-
-
 
 
 
@@ -385,6 +577,32 @@ Ex:- 	When you write the "Car" object to the OutputStream, the "writeExternal" m
 
 
 
+What are the differet Java Persistence Providers (JPA)
+=======================================================
+
+JPA  provides Data Persisitence in a distributed application (Persisting the entity beans to the Database)
+
+The followings are some of the Persistence Providers :
+
+1) ECLIPSELINK
+
+	Download the following JAR files
+			
+				org.eclipse.persistence.jpa.jpql_2.5.2.v20140319-9ad6abd.jar		(Provides Java Persisitence solution through the APIs)
+
+				org.eclipse.persistence.jpa.modelgen_2.5.2.v20140319-9ad6abd.jar	(Provides Java Persisitence solution through the APIs)	
+
+				javax.persistence_2.1.0.v201304241213.jar				(Provides Java Persisitence solution through the APIs)
+
+	Add the above jars to the Project's library (lib folder)
+	
+			D:\Sambit\NetBeansProjects\JavaWebApplication_Repository\<ProjectName>\lib
+
+	Note:- 
+	The NetBeans IDE already has ECLIPSELINK integrated with it. So you dont need to download or put the JARs in the lib folder
+
+
+2) HIBERNATE JPA
 
 
 
@@ -393,23 +611,95 @@ Ex:- 	When you write the "Car" object to the OutputStream, the "writeExternal" m
 
 
 
-LOG4J and LOG4JDBC - (Logs the application info during RUNTIME to a LOG FILE or CONSOLE or a DATABASE TABLE)
-=============================================================================================================
 
 
-Implement Log4J in a Java application
---------------------------------------
-1. Download the following JAR files:
-				log4j-1.2.17.jar 
-				log4jdbc-1.2.jar  
-				slf4j-api-1.7.5.jar
-				slf4j-log4j12-1.7.5.jar
+
+How to produce server logs for the appication on Run Time
+=================================================================
+
+The followings are some of the logging solutions, available which can be used for creating customized server logs to keep a track on the application's execution.
+
+1) ECLIPSELINK
+
+2) LOG4J & LOG4JDBC
+
+3) APACHE-COMMON-LOGGING
+
+
+    
+
+
+1) ECLIPSELINK (Provides SERVER-logs during APPLICATION RUNTIME and writes to a LOG FILE or CONSOLE or a DATABASE TABLE)
+   _______________________________________________________________________________________________________________________________________________________________
+
+   Implement eclipselink in a Java / Web Application
+   -------------------------------------------------
+   1. Download the following JAR file:
+				
+				eclipselink.jar		->(Provides loggings solution )
+
+   2. Add the above jars to the Project's library (lib folder)
+	
+			D:\Sambit\NetBeansProjects\JavaWebApplication_Repository\<ProjectName>\lib
+	
+	Note:- 
+	The NetBeans IDE already has ECLIPSELINK integrated with it. So you dont need to download or put the JARs in the lib folder
+
+   3. All the Persistence  and logging related configuration details are provided in an xml file - persistence.xml
+
+	persistence.xml :
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+	<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" 
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 										   				   xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+
+  		<persistence-unit name="<ProjectName>_PU" transaction-type="JTA">
+
+			<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    
+			<jta-data-source>jdbc/myTestDataSource</jta-data-source>
+    
+    			<exclude-unlisted-classes>false</exclude-unlisted-classes>
+    		
+			<properties>
+      				<property name="eclipselink.logging.level" value="FINEST"/>
+    			</properties>
+
+  		</persistence-unit>
+
+	</persistence>
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	Note:-
+	Other logging solutions such as "Log4J" and "Apache common logging" can be also integrated with EclipseLink by
+
+		1. Implementing your own SessionLog
+
+		2. Configuring the use of your SessionLog
+
+	
+
+
+2) LOG4J and LOG4JDBC - (Provides server logs  during APPLICATION RUNTIME and writes to a LOG FILE or CONSOLE or a DATABASE TABLE)
+   ______________________________________________________________________________________________________________________________________________________________
+
+   Implement Log4J in a Java application
+   --------------------------------------
+   1. Download the following JAR files:
+				log4j-1.2.17.jar 	(provides all types of logs except sql logs)
+
+				log4jdbc-1.2.jar  	(provides sql logs)
+
+				slf4j-api-1.7.5.jar	(supporting JAR for log4jdbc)
+
+				slf4j-log4j12-1.7.5.jar (supporting JAR for log4jdbc)
    
 	Note:- 
 		If there is no Database operations involved, then you need only the LOG4J JAR file (log4j-1.2.17.jar ) to provide the application logs
 	  	If there is database operation involved, then you also need the LOG4JDBC JAR files (log4jdbc-1.2.jar, slf4j-api-1.7.5.jar, slf4j-log4j12-1.7.5.jar )
 
-2. Add the following jars to the Project's librarry
+   2. Add the above jars to the Project's librarry
 	
 	NetBeans IDE - Right Click the Project > Properties > libraries > ADD JAR > select required JAR file(s) > OK
 
@@ -417,25 +707,32 @@ Implement Log4J in a Java application
 		NetBeans IDE <project tab> / <project name> / libraries 
 	
 	
-3. Create "log4j.properties" file 
+   3. Create "log4j.properties" file 
 	Right click source > new > other > properties file > select the folder 
 		"D:\Sambit\NetBeansProjects\JavaApplications_Repository\<JavaApplicationProject Name>"					
 	
    The properties file will be added to the Project
 
-4. All the configurations regarding logging must be declared in the properties file "log4j.properties" or in an XML mile "log4j.xml"
-	(There are five different levels of logging: DEBUG / INFO / WARN / ERROR / FATAL  )
+   4. All the configurations regarding logging must be declared in the properties file "log4j.properties" or in an XML mile "log4j.xml"
+
+	There are five different levels of logging: ALL / DEBUG / INFO / WARN / ERROR / FATAL
+
 	Note:- If the <logging level> is set as "DEBUG", then the logs of all levels ("DEBUG" level or higher than DEBUG) will be written to the log file / console.
 	       If the <logging level> is set as "INFO", then the logs of all levels ("INFO" level or higher than INFO) will be written to the log file / console.
 
-	log4j.properties:
+	log4j.properties (Log4J configuration file) :
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	#The Logger gathers the logs, then gets it to the appender and then the appender prints out the information to a LOG FILE or CONSOLE or a DATABASE TABLE
 
 
 	#Root Logger option
 	#log4j.rootLogger=<logging level>, <Appender1>, <Appender1>, <Appender1>, .....
-	#log4j.logger.<appname>logger=logging level>, <Appender1>, <Appender1>, <Appender1>, .....
+
+		or
+
+	#log4j.logger.<appname>logger=<logging level>, <Appender1>, <Appender1>, <Appender1>, .....
+
+	
 
 	log4j.rootLogger=DEBUG, fileOut, fileErrorOut, consoleOut, dbTableOut
 										#DEBUG is the logging level (This will produce logs- "DEBUG" level or higher)
@@ -444,16 +741,7 @@ Implement Log4J in a Java application
 										#consoleOut   - the appender used for writing the logs to CONSOLE
 										#dbTableOut   - the appender used for writing the logs to a DATABASE TABLE
 										#sqlConsoleOut- the appender used for writing SQL logs to CONSOLE
-	#### set the log4jdbc properties
-
-	log4j.logger.jdbc.sqlonly=DEBUG,LOg4JDBC 	
-	log4j.logger.jdbc.sqltiming=DEBUG,LOg4JDBC	
-	log4j.logger.jdbc.audit=OFF
-	log4j.logger.jdbc.resultset=ERROR,LOg4JDBC 	
-	log4j.logger.jdbc.connection=ERROR,LOg4JDBC 	
-	log4j.logger.jdbc.resultsettable=ON
-	#-Dlog4jdbc.debug.stack.prefix=myservetpackage							(defines from what level you want to capture the SQL execution)
-											
+							
  
 
 	#fileOut Appender writes all types of logging level(DEBUG, INFO, WARN, ERROR, FATAL) informations to a LOG FILE
@@ -466,7 +754,7 @@ Implement Log4J in a Java application
 	log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd} %5p [%t] (%F:%L) - %m%n		(defines the layout pattern-<file name>, <line no.>, <time>.. )
 
 
-	#fileErrorOut Appender writes only the ERROR information to a log file
+	#fileErrorOut Appender writes only the ERROR information to a LOG FILE
 
 	log4j.appender.fileErrorOut=org.apache.log4j.RollingFileAppender 				(defines the type of the appender, here it is a Rolling File)
 	log4j.appender.fileErrorOut.threshhold=ERROR							(makes the loggings restricted to only Error level)
@@ -495,36 +783,112 @@ Implement Log4J in a Java application
 	log4j.appender.dbTableOut.password=nbuser							(defines the password)
 	log4j.appender.dbTableOut.sql=INSERT INTO LOGS VALUES ('%x', now() ,'%C','%p','%m')		(defines the fields in the LOGS table)
 	log4j.appender.dbTableOut.layout=org.apache.log4j.PatternLayout					(defines the layout pattern-<file name>, <line no.>, <time>.. )
+	
+
+	#### set the log4jdbc properties
+
+	log4j.logger.jdbc.sqlonly=DEBUG,LOg4JDBC 	
+	log4j.logger.jdbc.sqltiming=DEBUG,LOg4JDBC	
+	log4j.logger.jdbc.audit=OFF
+	log4j.logger.jdbc.resultset=ERROR,LOg4JDBC 	
+	log4j.logger.jdbc.connection=ERROR,LOg4JDBC 	
+	log4j.logger.jdbc.resultsettable=ON
+
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-5. If database operations are involved in the application, then changes the JDBC driver and JDBC connection string wherever it is mentioned.
+   
+
+
+
+	log4j.xml (Log4J configuration file) :
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+	<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+		
+		<logger name="dev">
+			<level value="info"/>
+		</logger>
+		
+		<logger name="org.apache.log4j">
+			<level value="debug"/>
+		</logger>
+		
+		<logger name="org.eclipse.persistence">
+			<level value="debug"/>
+		</logger>
+		
+		
+		<root>
+			<level value="debug"/>
+			<appender-ref ref="fileOut"/>
+			<appender-ref ref="fileErrorOut"/>
+			<appender-ref ref="consoleOut"/>
+			<appender-ref ref="dbTableOut"/>
+		</root>
+
+		<appender name="fileOut" class="org.apache.log4j.RollingFileAppender">
+			<param name="File" value="D:\\Sambit\\NetBeansProjects\\SERVER_LOGS_UsingLog4J\\<ProjectName>.log"/>
+			<param name="MaxFileSize" value="10000KB"/>
+			<param name="MaxBackupIndex" value="5"/>
+			<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd} %p [%t] - %m%n"/>
+			</layout>
+		</appender>
+
+		<appender name="fileErrorOut" class="org.apache.log4j.RollingFileAppender">
+			<param name="File" value="D:\\Sambit\\NetBeansProjects\\SERVER_LOGS_UsingLog4J\\<ProjectName>_Error.log"/>
+			<param name="MaxFileSize" value="10000KB"/>
+			<param name="MaxBackupIndex" value="5"/>
+			<param name="Threshold" value="error"/>
+			<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd} %p [%t] - %m%n"/>
+			</layout>
+		</appender>
+
+		<appender name="consoleOut" class="org.apache.log4j.ConsoleAppender">
+			<param name="Threshold" value="debug"/>
+			<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd} %p [%t] - %m%n"/>
+			</layout>
+		</appender>
+	
+
+	</log4j:configuration>
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+   5. If database operations are involved in the application, then log4jdbc will provide the sql logs
+		
+			change the JDBC driver and JDBC connection string throughout the project.
 		
 			com.mysql.jdbc.Driver 			to 		net.sf.log4jdbc.DriverSpy 
 			jdbc:mysql://localhost:3306/test 	to 		jdbc:log4jdbc:mysql://localhost:3306/mytestschema
 
 
-6. Import the Logger and PropertyConfigurator in the application class
+   6. Import the Logger and PropertyConfigurator in the application class
 			
 			Code:- 
 				import org.apache.log4j.Logger;
 				import org.apache.log4j.PropertyConfigurator;
 	
-7. Create a logger object inside the class:
+   7. Create a logger object inside the class:
 			
 			Code:- 
 				final static Logger logger = Logger.getLogger(<classname>.class);
 
-8. Inside the the main() method, configure the properties file
+   8. Inside the the main() method, configure the properties file
 
 			Code:- 
 				PropertyConfigurator.configure("log4j.properties");
 
-9. Inside the main() method, Use the logger object to print specific information to the log file
+   9. Inside the main() method, Use the logger object to print specific information to the log file
 
 			Code:- 
 				logger.info("successful");
 
-10. If you think a particular job execution may give error at run time, then you can put that part in the try block and catch the error through logger.error
+   10. If you think a particular job execution may give error at run time, then you can put that part in the try block and catch the error through logger.error
 			Code :- 
 				try{
                    
@@ -534,7 +898,7 @@ Implement Log4J in a Java application
                     			logger.error("Error while Reading from the File"+e.getMessage());	// Error is captured and printed to the log file
                 		}
 
-11. Run the application
+   11. Run the application
 
 	A log file "<ProjectName>.log"      will be created under the folder D:\Sambit\NetBeansProjects\SERVER_LOGS_UsingLog4J
 	A log file "<ProjectName>Error.log" will be created under the folder D:\Sambit\NetBeansProjects\SERVER_LOGS_UsingLog4J 
@@ -542,9 +906,9 @@ Implement Log4J in a Java application
 
 	
 
-Implement Log4J in a Web Application
-----------------------------------------
-1. Download the following JAR files:
+   Implement Log4J in a Web Application
+   ----------------------------------------
+   1. Download the following JAR files:
 				log4j-1.2.17.jar 
 				log4jdbc-1.2.jar  
 				slf4j-api-1.7.5.jar
@@ -554,7 +918,7 @@ Implement Log4J in a Web Application
 		If there is no Database operations involved, then you need only the LOG4J JAR file (log4j-1.2.17.jar ) to provide the application logs
 	  	If there is database operation involved, then you also need the LOG4JDBC JAR files (log4jdbc-1.2.jar, slf4j-api-1.7.5.jar, slf4j-log4j12-1.7.5.jar )
 
-2. Add the following jars to the Project's librarry
+   2. Add the following jars to the Project's librarry
 	
 	NetBeans IDE - Right Click the Project > Properties > libraries > ADD JAR > select required JAR file(s) > OK
 
@@ -567,7 +931,7 @@ Implement Log4J in a Web Application
 	Also put the jar files in the glassfish library folder-
 							C:\Program Files\glassfish-4.1\glassfish\domains\domain1\lib\
 			
-3. Create "log4j.properties" file 
+   3. Create "log4j.properties" file 
 	Right click source > new > other > properties file > select the folder 
 		
 		"D:\Sambit\NetBeansProjects\JavaWebApplication_Repository\<WebApplicationProject Name>\web\WEB-INF" 			
@@ -575,9 +939,10 @@ Implement Log4J in a Web Application
 	The properties file will be added to the Project
 
 
-4. All the configurations regarding logging must be declared in the properties file "log4j.properties" or in an XML mile "log4j.xml"
+   4. All the configurations regarding logging must be declared in the properties file "log4j.properties" or in an XML mile "log4j.xml"
 	
-	(There are five different levels of logging: DEBUG / INFO / WARN / ERROR / FATAL  )
+	There are five different levels of logging: ALL / DEBUG / INFO / WARN / ERROR / FATAL
+
 	Note:- If the <logging level> is set as "DEBUG", then the logs of all levels ("DEBUG" level or higher than DEBUG) will be written to the log file / console.
 	       If the <logging level> is set as "INFO", then the logs of all levels ("INFO" level or higher than INFO) will be written to the log file / console.
 
@@ -650,21 +1015,21 @@ Implement Log4J in a Web Application
 	log4j.appender.dbTableOut.layout=org.apache.log4j.PatternLayout					(defines the layout pattern-<file name>, <line no.>, <time>.. )
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-5. If database operations are involved in the application, then changes the JDBC driver and JDBC connection string wherever it is mentioned.
+   5. If database operations are involved in the application, then changes the JDBC driver and JDBC connection string wherever it is mentioned.
 		
 			com.mysql.jdbc.Driver 			to 		net.sf.log4jdbc.DriverSpy 
 			jdbc:mysql://localhost:3306/test 	to 		jdbc:log4jdbc:mysql://localhost:3306/mytestschema
 
-6. Import the Logger and PropertyConfigurator in the servlet class
+   6. Import the Logger and PropertyConfigurator in the servlet class
 			Code:- 
 				import org.apache.log4j.Logger;
 				import org.apache.log4j.PropertyConfigurator;
 	
-7. Create a logger object inside the servlet class- 
+   7. Create a logger object inside the servlet class- 
 
 			final static Logger logger = Logger.getLogger(<classname>.class);
 
-8. In the web.xml, Define how the servlet will locate properties file 
+   8. In the web.xml, Define how the servlet will locate properties file 
 
 			Code:-
 				<servlet>
@@ -677,7 +1042,7 @@ Implement Log4J in a Web Application
     				</servlet>
 
 	
-9. Configure the properties file in the Servlet's init() or doGet() or doPost() depending on the requirement:
+   9. Configure the properties file in the Servlet's init() or doGet() or doPost() depending on the requirement:
 
 		PropertyConfigurator.configure(<dynamic path of the properties file>); 
 		
@@ -695,13 +1060,13 @@ Implement Log4J in a Web Application
 									       (WEB-INF/log4j.properties) 
 		
 
-10. Inside the doGet() / doPost() method, Use the logger object to print specific information to the log file
+   10. Inside the doGet() / doPost() method, Use the logger object to print specific information to the log file
 			Example Code:-
 				logger.info("the passed query string customer name = "+ customer_name);
             			logger.debug("query string to print out:"+ customer_name);
 
 
-11. If you think a particular job execution may give error at run time, then you can put that part in the try block and catch the error through logger.error
+   11. If you think a particular job execution may give error at run time, then you can put that part in the try block and catch the error through logger.error
 			Example Code :- 
 				try{
                    
@@ -711,7 +1076,7 @@ Implement Log4J in a Web Application
                     			logger.error("Error while executing query"+sqle.getMessage());	// Error is captured and printed to the log file
                 		}
 
-12. Run the application
+   12. Run the application
 	
 	A log file "<Project name>.log"  will be created under the folder D:\Sambit\NetBeansProjectsLOG4J\SERVER_LOGS_UsingLog4J
 	A log file "<Project name>Error.log" will be created under the folder D:\Sambit\NetBeansProjectsLOG4J\SERVER_LOGS_UsingLog4J 
@@ -1357,10 +1722,31 @@ The files “sun-resources.xml”  and  “web.xml”  are needed to be bundled in the W
 
 
 Accessing a database from JSP / Servlet:
+========================================
 
-====================================================
-Case:1 (JSP and web.xml) -  Refer WebAppProject1 
-====================================================
+Case:1 (JSP) - Refer WebAppProject7
+-------------------------------------
+If you don't want to create an entry in the "web.xml" file to refer to the data-source("jdbc/myTestDataSource"), then you have to access the "mytestschema" database directly from the JSP file as follows:
+		
+		<%@taglib prefix="sql"  uri="http://java.sun.com/jsp/jstl/sql" %>  		--> should be at the beginning of the JSP file
+		
+		<sql:setDataSource  var=	"myDataSource" 
+                        			driver=	"com.mysql.jdbc.Driver"
+                        			url=	"jdbc:mysql://localhost:3306/mytestschema"
+                        			user=	"root"  
+                        			password="nbuser"
+		/>
+
+
+		Now you can operate on the "mytestschema" database by mentioning the datasource name in JSTL-SQL query as follows:
+		
+		<sql:query var="customerResult" dataSource="${myDataSource}">
+			SELECT * FROM customer
+		</sql:query>
+
+
+Case:2 (JSP and web.xml) -  Refer WebAppProject1 
+-------------------------------------------------
 After setting up the data source and connection pool for the database("mytestschema"), you the need to instruct the application to use the data source("jdbc/myTestDataSource"). This can be done by creating an entry in the application's  deployment descriptor ("web.xml").
 
 		<resource-ref>
@@ -1374,8 +1760,8 @@ After setting up the data source and connection pool for the database("mytestsch
 
 				
 
-So in the JSP page, you need not define the database access details.
-You can directly operate on the "mytestschema" database just by mentioning the datasource name in JSTL-SQL query as follows:
+		So in the JSP page, you need not define the database access details.
+		You can directly operate on the "mytestschema" database just by mentioning the datasource name in JSTL-SQL query as follows:
 		
 		<%@taglib prefix="sql"  uri="http://java.sun.com/jsp/jstl/sql" %>  		--> should be at the beginning of the JSP file
 		
@@ -1384,30 +1770,9 @@ You can directly operate on the "mytestschema" database just by mentioning the d
         	</sql:query>
 
 
-====================================================
-Case:2 (JSP) - Refer WebAppProject7
-====================================================
-If you don't want to create an entry in the "web.xml" file to refer to the data-source("jdbc/myTestDataSource"), then you have to access the "mytestschema" database directly from the JSP file as follows:
-		
-		<%@taglib prefix="sql"  uri="http://java.sun.com/jsp/jstl/sql" %>  		--> should be at the beginning of the JSP file
-		
-		<sql:setDataSource  var=	"myDataSource" 
-                        			driver=	"com.mysql.jdbc.Driver"
-                        			url=	"jdbc:mysql://localhost:3306/mytestschema"
-                        			user=	"root"  
-                        			password="nbuser"
-		/>
 
-
-	Now you can operate on the "mytestschema" database by mentioning the datasource name in JSTL-SQL query as follows:
-		
-		<sql:query var="customerResult" dataSource="${myDataSource}">
-			SELECT * FROM customer
-		</sql:query>
-
-==================================================== 
 Case:3 (Servlet) - Refer WebAppProject3
-====================================================
+-------------------------------------------
 If you don't want to create an entry in the "web.xml" file to refer to the data-source("jdbc/myTestDataSource"), then you can the access the database directly from the servlet by registering the JDBC driver and opening a connection to the database through the DriverManager as follows:
 
 		/* --------------JDBC driver name and database URL for MYSQL dabase server-------------------*/
